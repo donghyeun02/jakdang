@@ -97,9 +97,44 @@
 - 서버는 서비스 운영을 위해 접속 수·메시지 수 같은 **숫자만** 날짜별로 세요. 이름, 코드, 메시지 내용, IP는 통계에 남기지 않아요.
 - 다운로드 페이지는 방문 통계를 위해 Google Analytics를 사용할 수 있어요. 앱 자체에는 Google Analytics가 없어요.
 
+## 어떻게 만들었나
+
+**구조**
+
+- Electron 앱 + Node.js WebSocket 중계 서버
+- 메시지 형식과 검사 규칙(`shared/protocol.js`)을 앱과 서버가 같은 코드로 써요.
+
+**기기 인증**
+
+- 처음 그 초대 코드를 쓴 기기만 접속할 수 있어요.
+- 서버에는 기기 키의 해시만 저장해요.
+
+**테스트**
+
+- `node:test`로 **92**개 케이스 (프로토콜, 중계 서버, 기기 인증, 미니게임 규칙, 다운로드 페이지)
+- 가짜 사용자 N명을 붙이는 부하 테스트 스크립트가 따로 있어요.
+
+**배포**
+
+- 서버 코드가 바뀌면 GitHub Actions가 테스트를 돌려요.
+- 서버는 2분마다 GitHub를 확인해 스스로 업데이트해요. 그래서 SSH를 바깥에 열어 둘 필요가 없어요.
+- 버전 태그를 푸시하면 맥 `.dmg`·윈도우 `.exe`를 빌드해 Release 초안으로 올려요. 맥 빌드는 서명·공증을 받아요.
+
+**알려진 한계**
+
+- 서버는 상태를 메모리에 두는 한 대 기준 설계예요. 여러 대로 늘리려면 공유 저장소가 필요해요.
+- 서버를 다시 켜도 방은 유지되지만, 최근 대화 기록은 비워져요.
+
 ## 개발에 참여하거나 직접 띄워보려면
 
-- 개발 환경, 구조, 테스트: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
+```bash
+npm install
+npm test          # 테스트
+npm run server    # 로컬 서버 (ws://localhost:8787)
+npm start         # 앱
+```
+
+- 개발 환경, 구조, 스크립트: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 - 서버 배포: [docs/DEPLOY_NCLOUD.md](docs/DEPLOY_NCLOUD.md)
 
 ## 라이선스
